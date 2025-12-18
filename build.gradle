@@ -1,0 +1,72 @@
+plugins {
+    id 'fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+loom_version = project.loom_version
+
+base {
+    archivesName = project.archives_base_name
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        "alwaysarrowmap" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+repositories {
+    // Add repositories to retrieve artifacts from in here.
+    maven { url "https://maven.shedaniel.me/" }
+    maven { url "https://maven.terraformersmc.com/releases/" }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${System.getenv('MINECRAFT_VERSION') ?: project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${System.getenv('YARN_MAPPINGS') ?: project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${System.getenv('LOADER_VERSION') ?: project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${System.getenv('FABRIC_VERSION') ?: project.fabric_version}"
+    }
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "minecraft_version_range", project.minecraft_version_range
+    inputs.property "loader_version", project.loader_version
+    inputs.property "min_fabric_version", project.min_fabric_version
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version,
+                "minecraft_version_range": project.minecraft_version_range,
+                "loader_version": project.loader_version,
+                "min_fabric_version": project.min_fabric_version
+    }
+}
+
+def targetJavaVersion = 21
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        it.options.release.set(targetJavaVersion)
+    }
+}
+
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+    withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
