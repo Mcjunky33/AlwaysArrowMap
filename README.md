@@ -1,3 +1,5 @@
+![Showcase](https://cdn.modrinth.com/data/cached_images/e87ce23644c7e62dcb472f78dd69e628ec7c4bc4.gif)
+
 # AlwaysArrowMap
 ## English
 
